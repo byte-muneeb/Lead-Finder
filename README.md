@@ -9,7 +9,7 @@ Type a query → 10 parallel Google Maps variants + OpenStreetMap → filter to 
 GitHub repo description: Find businesses on Google Maps and OpenStreetMap that do not have websites, then export them as leads.
 
 [![Deploy with Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fbyte-muneeb%2FLead-Finder&env=SERPER_API_KEY&envDescription=Free%20Serper%20API%20key%20from%20serper.dev&envLink=https%3A%2F%2Fserper.dev)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-your--project.vercel.app-blue?style=for-the-badge&logo=vercel)](https://YOUR_PROJECT.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-your--project.vercel.app-blue?style=for-the-badge&logo=vercel)]([https://YOUR_PROJECT.vercel.app](https://lead-finder-psi.vercel.app/))
 [![Serper](https://img.shields.io/badge/Search-Serper-FF6B35?style=for-the-badge)](https://serper.dev)
 [![OpenStreetMap](https://img.shields.io/badge/Free-OpenStreetMap-7EBC6F?style=for-the-badge&logo=openstreetmap)](https://overpass-api.de)
 [![License](https://img.shields.io/badge/License-MIT-A3E635?style=for-the-badge)](LICENSE)
