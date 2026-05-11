@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lead Finder</title>
+<meta name="description" content="Find businesses without a website — your next clients to pitch." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070710;
+  --surface:rgba(255,255,255,.035);
+  --surface-2:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.08);
+  --border-strong:rgba(255,255,255,.16);
+  --text:#f5f5f7;
+  --text-dim:#9b9ba8;
+  --text-muted:#6b6b78;
+  --accent:#a3e635;
+  --accent-soft:rgba(163,230,53,.12);
+  --gold:#fbbf24;
+  --danger:#f87171;
+  --radius:14px;
+}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  font-feature-settings:"cv11","ss01";
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:-0.011em;
+  position:relative;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(60vw 60vh at 20% 0%,rgba(163,230,53,.08),transparent 60%),
+    radial-gradient(40vw 40vh at 90% 100%,rgba(99,102,241,.07),transparent 60%);
+}
+.wrap{max-width:1100px;margin:0 auto;padding:88px 28px 120px}
+@media (max-width:640px){.wrap{padding:48px 18px 80px}}
+
+.hero{text-align:center;margin-bottom:48px}
+.hero h1{
+  font-size:clamp(2.4rem,6vw,4rem);
+  font-weight:800;
+  letter-spacing:-0.04em;
+  line-height:1.05;
+  margin-bottom:14px;
+}
+.hero p{color:var(--text-dim);font-size:clamp(1rem,2vw,1.15rem);max-width:520px;margin:0 auto}
+
+.search{
+  max-width:720px;margin:0 auto 18px;
+  display:flex;gap:8px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:6px;
+  transition:border-color .15s,background .15s;
+}
+.search:focus-within{border-color:var(--border-strong);background:var(--surface-2)}
+.search input{
+  flex:1;background:transparent;border:none;outline:none;color:var(--text);
+  padding:14px 16px;font-size:1rem;font-family:inherit;letter-spacing:-0.011em;
+}
+.search input::placeholder{color:var(--text-muted)}
+.search button{
+  background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;
+  padding:0 22px;font-weight:600;font-size:.95rem;cursor:pointer;font-family:inherit;
+  transition:opacity .15s,transform .1s;
+}
+.search button:hover:not(:disabled){opacity:.9}
+.search button:active:not(:disabled){transform:scale(.97)}
+.search button:disabled{opacity:.5;cursor:not-allowed}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:720px;margin:0 auto}
+.chip{
+  background:transparent;border:1px solid var(--border);color:var(--text-dim);
+  padding:6px 12px;border-radius:999px;font-size:.82rem;font-family:inherit;
+  cursor:pointer;transition:all .15s;
+}
+.chip:hover{border-color:var(--border-strong);color:var(--text);background:var(--surface)}
+
+.status{text-align:center;color:var(--text-dim);font-size:.9rem;margin:40px auto 18px;min-height:1.4em}
+.status .error{color:var(--danger)}
+
+.toolbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.toolbar input,.toolbar a,.toolbar button{
+  background:var(--surface);border:1px solid var(--border);color:var(--text-dim);
+  padding:8px 14px;border-radius:9px;font-size:.85rem;outline:none;font-family:inherit;
+  text-decoration:none;cursor:pointer;transition:all .15s;
+}
+.toolbar input{min-width:220px}
+.toolbar input::placeholder{color:var(--text-muted)}
+.toolbar input:focus{border-color:var(--border-strong);color:var(--text)}
+.toolbar a:hover,.toolbar button:hover{color:var(--text);border-color:var(--border-strong)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:24px}
+.stat{padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.stat-l{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.stat-v{font-size:1.4rem;font-weight:700;margin-top:4px;letter-spacing:-0.02em}
+.stat-v.lead{color:var(--accent)}
+
+.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;
+  transition:border-color .15s,background .15s,transform .15s;
+}
+.card:hover{border-color:var(--border-strong);background:var(--surface-2);transform:translateY(-1px)}
+.card h3{font-size:1rem;font-weight:600;line-height:1.3;margin-bottom:4px;letter-spacing:-0.012em}
+.card h3 a{color:var(--text);text-decoration:none}
+.card h3 a:hover{color:var(--accent)}
+.card .cat{display:inline-block;color:var(--text-muted);font-size:.78rem;margin-bottom:10px}
+.card .row{font-size:.85rem;color:var(--text-dim);margin:4px 0;display:flex;gap:8px;align-items:start;word-break:break-word}
+.card .row a{color:var(--text);text-decoration:none;border-bottom:1px dotted var(--text-muted)}
+.card .row a:hover{color:var(--accent);border-color:var(--accent)}
+.card .ico{color:var(--text-muted);flex-shrink:0;width:16px}
+.rating{color:var(--gold);font-weight:600;font-size:.85rem}
+.rev{color:var(--text-muted);font-weight:400}
+.tags{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.tag{font-size:.7rem;padding:3px 9px;border-radius:999px;font-weight:600;letter-spacing:.01em}
+.tag.no-site{background:var(--accent-soft);color:var(--accent)}
+.tag.phone{background:rgba(251,191,36,.1);color:var(--gold)}
+.tag.src{background:var(--surface-2);color:var(--text-muted)}
+
+.empty{text-align:center;padding:48px;color:var(--text-muted);grid-column:1/-1;font-size:.95rem}
+
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid transparent;
+  border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>Lead Finder</h1>
+    <p>Find businesses without a website — your next clients to pitch.</p>
+  </div>
+
+  <form class="search" id="searchForm">
+    <input name="query" placeholder="Try: dentists in Karachi" required autofocus autocomplete="off" />
+    <button type="submit" id="searchBtn">Search</button>
+  </form>
+
+  <div class="chips">
+    <button class="chip" type="button" data-q="dentists in Karachi">Dentists · Karachi</button>
+    <button class="chip" type="button" data-q="plumbers in Lahore">Plumbers · Lahore</button>
+    <button class="chip" type="button" data-q="salons in Dubai">Salons · Dubai</button>
+    <button class="chip" type="button" data-q="restaurants in Mumbai">Restaurants · Mumbai</button>
+    <button class="chip" type="button" data-q="cafes in Islamabad">Cafes · Islamabad</button>
+    <button class="chip" type="button" data-q="gyms in Lahore">Gyms · Lahore</button>
+    <button class="chip" type="button" data-q="lawyers in Karachi">Lawyers · Karachi</button>
+    <button class="chip" type="button" data-q="bakeries in Toronto">Bakeries · Toronto</button>
+  </div>
+
+  <div id="status" class="status">&nbsp;</div>
+
+  <div class="toolbar" id="toolbar" style="display:none">
+    <input type="text" id="filter" placeholder="Filter results…" />
+    <button type="button" id="exportBtn">Download this search</button>
+    <button type="button" id="exportAllBtn">Download all collected</button>
+    <button type="button" id="clearBtn">Clear collected</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="results" id="results"></div>
+</div>
+
+<script>
+const SEARCH_URL = '/api/search';
+const STORE_KEY = 'leadFinderLeads';
+const VARIANTS = [
+  q => q,
+  q => 'best ' + q,
+  q => 'top ' + q,
+  q => 'popular ' + q,
+  q => 'new ' + q,
+  q => q + ' reviews',
+  q => 'local ' + q,
+  q => 'famous ' + q,
+  q => 'recommended ' + q,
+  q => 'small ' + q,
+];
+
+const OSM_TAGS = {
+  dentist:['amenity','dentist'], dentists:['amenity','dentist'],
+  doctor:['amenity','doctors'], doctors:['amenity','doctors'], clinic:['amenity','clinic'], clinics:['amenity','clinic'],
+  pharmacy:['amenity','pharmacy'], pharmacies:['amenity','pharmacy'],
+  restaurant:['amenity','restaurant'], restaurants:['amenity','restaurant'],
+  cafe:['amenity','cafe'], cafes:['amenity','cafe'],
+  bar:['amenity','bar'], bars:['amenity','bar'], pub:['amenity','pub'], pubs:['amenity','pub'],
+  bakery:['shop','bakery'], bakeries:['shop','bakery'],
+  salon:['shop','beauty'], salons:['shop','beauty'], spa:['leisure','spa'], spas:['leisure','spa'],
+  barber:['shop','hairdresser'], barbers:['shop','hairdresser'], hairdresser:['shop','hairdresser'],
+  hotel:['tourism','hotel'], hotels:['tourism','hotel'],
+  school:['amenity','school'], schools:['amenity','school'],
+  gym:['leisure','fitness_centre'], gyms:['leisure','fitness_centre'],
+  lawyer:['office','lawyer'], lawyers:['office','lawyer'], attorney:['office','lawyer'],
+  mechanic:['shop','car_repair'], mechanics:['shop','car_repair'],
+  electrician:['craft','electrician'], electricians:['craft','electrician'],
+  plumber:['craft','plumber'], plumbers:['craft','plumber'],
+  tailor:['craft','tailor'], tailors:['craft','tailor'],
+  butcher:['shop','butcher'], butchers:['shop','butcher'],
+  florist:['shop','florist'], florists:['shop','florist'],
+  optician:['shop','optician'], opticians:['shop','optician'],
+};
+
+const form = document.getElementById('searchForm');
+const statusEl = document.getElementById('status');
+const statsEl = document.getElementById('stats');
+const resultsEl = document.getElementById('results');
+const filterInput = document.getElementById('filter');
+const exportBtn = document.getElementById('exportBtn');
+const exportAllBtn = document.getElementById('exportAllBtn');
+const clearBtn = document.getElementById('clearBtn');
+const searchBtn = document.getElementById('searchBtn');
+const toolbar = document.getElementById('toolbar');
+let currentLeads = [];
+let detectedCountry = 'us';
+
+(async function(){
+  const fns = [
+    async () => { const r = await fetch('https://api.country.is/'); if(!r.ok) return null; const d = await r.json(); return d.country ? d.country.toLowerCase() : null; },
+    async () => { const r = await fetch('https://ipapi.co/json/'); if(!r.ok) return null; const d = await r.json(); return d.country_code ? d.country_code.toLowerCase() : null; },
+  ];
+  for (const fn of fns) {
+    try { const c = await fn(); if (c) { detectedCountry = c; return; } } catch(_) {}
+  }
+  const m = (navigator.language || 'en-US').match(/-([A-Z]{2})/);
+  if (m) detectedCountry = m[1].toLowerCase();
+})();
+
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => { form.query.value = c.dataset.q; form.requestSubmit(); });
+});
+
+function getStored(){ try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch { return []; } }
+function setStored(arr){ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
+function key(l){ return (l.Name||'').toLowerCase().trim() + '|' + (l.Address||'').toLowerCase().trim(); }
+function addToStore(leads){
+  const existing = getStored();
+  const seen = new Set(existing.map(l => key(l)));
+  let added = 0;
+  for (const l of leads) {
+    const k = key(l);
+    if (seen.has(k)) continue;
+    seen.add(k); existing.push(l); added++;
+  }
+  setStored(existing);
+  return { added, total: existing.length };
+}
+
+function parseForOSM(q){
+  const lower = q.toLowerCase();
+  let best = null;
+  for (const k of Object.keys(OSM_TAGS)) {
+    const re = new RegExp('\\b' + k.replace(/\s+/g,'\\s+') + '\\b','i');
+    if (re.test(lower) && (!best || k.length > best.length)) best = k;
+  }
+  const cityMatch = q.match(/\bin\s+([\w\s.'-]+?)\s*$/i);
+  return { tag: best ? OSM_TAGS[best] : null, city: cityMatch ? cityMatch[1].trim() : null };
+}
+
+async function searchOSM(query){
+  const { tag, city } = parseForOSM(query);
+  if (!tag || !city) return [];
+  const [k, v] = tag;
+  const ql = '[out:json][timeout:25];area["name"~"^' + city.replace(/['"\\]/g,'') + '$",i]->.a;(node["' + k + '"="' + v + '"](area.a);way["' + k + '"="' + v + '"](area.a););out center 80;';
+  try {
+    const r = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(ql) });
+    if (!r.ok) return [];
+    const data = await r.json();
+    const out = [];
+    for (const el of (data.elements || [])) {
+      const tags = el.tags || {};
+      if (tags.website || tags.url || tags['contact:website']) continue;
+      const name = tags.name; if (!name) continue;
+      const lat = el.lat ?? el.center?.lat, lon = el.lon ?? el.center?.lon;
+      const addr = [tags['addr:housenumber'], tags['addr:street'], tags['addr:suburb'], tags['addr:city']].filter(Boolean).join(', ');
+      out.push({
+        UUID:'osm-'+el.type+'-'+el.id, Name:name, Address:addr || 'N/A',
+        Number:(tags.phone || tags['contact:phone'] || '').replace(/^\+/,'') || 'N/A',
+        Website:'N/A', Rating:'N/A', ReviewsCount:null,
+        OpeningHours: tags.opening_hours || 'N/A',
+        Category: tags[k] || k, Latitude:lat ?? null, Longitude:lon ?? null,
+        Email: tags.email || tags['contact:email'] || 'N/A',
+        Query:query, FetchedAt:new Date().toISOString(), Source:'OSM',
+      });
+    }
+    return out;
+  } catch(_) { return []; }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const baseQuery = form.query.value.trim();
+  if (!baseQuery) return;
+  const queries = [...new Set(VARIANTS.map(f => f(baseQuery)))];
+  searchBtn.disabled = true;
+  searchBtn.innerHTML = '<span class="spinner"></span>Searching';
+  statusEl.innerHTML = 'Searching <strong>' + escapeHtml(baseQuery) + '</strong>…';
+  statsEl.innerHTML = ''; resultsEl.innerHTML = ''; toolbar.style.display = 'none';
+
+  const t0 = performance.now();
+  try {
+    const serperResponses = await Promise.all(queries.map(async (q) => {
+      try {
+        const r = await fetch(SEARCH_URL, { method:'POST', headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ query: q, gl: detectedCountry, hl: 'en' }),
+        });
+        if (!r.ok) {
+          const detail = (await r.text().catch(() => '')).trim().slice(0, 160);
+          return { ok: false, error: 'API ' + r.status + (detail ? ': ' + detail : '') };
+        }
+        return { ok: true, data: await r.json() };
+      } catch (err) {
+        return { ok: false, error: err.message || 'request failed' };
+      }
+    }));
+    const results = serperResponses.filter(r => r.ok).map(r => r.data);
+    const apiErrors = serperResponses.filter(r => !r.ok).map(r => r.error);
+    const osmLeads = await Promise.race([
+      searchOSM(baseQuery),
+      new Promise(resolve => setTimeout(() => resolve([]), 6000)),
+    ]);
+
+    const seen = new Set();
+    const leads = [];
+    for (const r of results) {
+      if (!r) continue;
+      for (const l of (r.leads || [])) {
+        const k = key(l);
+        if (!seen.has(k)) { seen.add(k); l.Source = l.Source || 'Maps'; leads.push(l); }
+      }
+    }
+    let osmAdded = 0;
+    for (const l of osmLeads) {
+      const k = key(l);
+      if (!seen.has(k)) { seen.add(k); leads.push(l); osmAdded++; }
+    }
+
+    const { total: totalInStore } = addToStore(leads);
+    const dt = ((performance.now() - t0) / 1000).toFixed(1);
+    currentLeads = leads;
+    renderStats({ totalLeads: leads.length, withPhone: leads.filter(l => l.Number && l.Number !== 'N/A').length, totalInStore, fromOSM: osmAdded }, dt);
+    renderLeads(leads);
+    if (leads.length) {
+      statusEl.innerHTML = '<strong>' + leads.length + '</strong> leads in ' + dt + 's · ' + totalInStore + ' total collected (saved in your browser)';
+    } else if (apiErrors.length) {
+      statusEl.innerHTML = '<span class="error">Search backend failed: ' + escapeHtml(apiErrors[0]) + '</span>';
+    } else {
+      statusEl.innerHTML = 'No leads without a website found. Try a different query.';
+    }
+    if (leads.length) toolbar.style.display = 'flex';
+  } catch (err) {
+    statusEl.innerHTML = '<span class="error">' + escapeHtml(err.message) + '</span>';
+  } finally {
+    searchBtn.disabled = false; searchBtn.textContent = 'Search';
+  }
+});
+
+filterInput.addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  renderLeads(currentLeads.filter(l =>
+    (l.Name||'').toLowerCase().includes(q) ||
+    (l.Address||'').toLowerCase().includes(q) ||
+    (l.Category||'').toLowerCase().includes(q)
+  ));
+});
+
+exportBtn.addEventListener('click', () => downloadCsv(currentLeads, 'leads-' + Date.now() + '.csv'));
+exportAllBtn.addEventListener('click', () => {
+  const all = getStored();
+  if (!all.length) { alert('Nothing collected yet.'); return; }
+  downloadCsv(all, 'all-leads-' + Date.now() + '.csv');
+});
+clearBtn.addEventListener('click', () => {
+  if (!confirm('Delete all ' + getStored().length + ' collected leads from this browser?')) return;
+  localStorage.removeItem(STORE_KEY);
+  statusEl.innerHTML = 'Cleared.';
+  toolbar.style.display = 'none';
+  statsEl.innerHTML = ''; resultsEl.innerHTML = '';
+  currentLeads = [];
+});
+
+function downloadCsv(rows, fileName){
+  const cols = ['UUID','Name','Address','Number','Rating','ReviewsCount','Category','Source','Query','FetchedAt'];
+  const out = [cols.join(',')];
+  for (const l of rows) out.push(cols.map(c => csv(l[c])).join(','));
+  const blob = new Blob([out.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName;
+  a.click();
+}
+
+function csv(v){ if(v==null) return ''; const s=String(v); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderStats(r, dt){
+  const cards = [
+    { l:'Leads', v: r.totalLeads ?? 0, hl:true },
+    { l:'With phone', v: r.withPhone ?? 0 },
+    { l:'From OSM', v: r.fromOSM ?? 0 },
+    { l:'Total collected', v: r.totalInStore ?? '—' },
+    { l:'Time', v: dt + 's' },
+  ];
+  statsEl.innerHTML = cards.map(c =>
+    '<div class="stat"><div class="stat-l">' + escapeHtml(c.l) + '</div>' +
+    '<div class="stat-v' + (c.hl ? ' lead' : '') + '">' + escapeHtml(c.v) + '</div></div>'
+  ).join('');
+}
+
+function renderLeads(leads){
+  if (!leads.length) { resultsEl.innerHTML = '<div class="empty">No leads to show.</div>'; return; }
+  resultsEl.innerHTML = leads.map(l => {
+    const mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((l.Name||'') + ' ' + (l.Address||''));
+    const stars = l.Rating && l.Rating !== 'N/A'
+      ? '<span class="rating">★ ' + escapeHtml(l.Rating) + '</span>' +
+        (l.ReviewsCount ? ' <span class="rev">(' + escapeHtml(l.ReviewsCount) + ')</span>' : '')
+      : '';
+    const hasPhone = l.Number && l.Number !== 'N/A';
+    return '<div class="card">' +
+      '<h3><a href="' + mapsUrl + '" target="_blank" rel="noopener">' + escapeHtml(l.Name || 'Unnamed') + '</a></h3>' +
+      (l.Category ? '<div class="cat">' + escapeHtml(l.Category) + '</div>' : '') +
+      (stars ? '<div class="row">' + stars + '</div>' : '') +
+      (l.Address && l.Address !== 'N/A' ? '<div class="row"><span class="ico">📍</span><span>' + escapeHtml(l.Address) + '</span></div>' : '') +
+      (hasPhone ? '<div class="row"><span class="ico">📞</span><a href="tel:+' + escapeHtml(l.Number) + '">+' + escapeHtml(l.Number) + '</a></div>' : '') +
+      '<div class="tags"><span class="tag no-site">No website</span>' + (hasPhone ? '<span class="tag phone">Phone</span>' : '') + '<span class="tag src">' + escapeHtml(l.Source || 'Maps') + '</span></div>' +
+      '</div>';
+  }).join('');
+}
+</script>
+</body>
+</html>
